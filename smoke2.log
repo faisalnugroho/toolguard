@@ -1,0 +1,22 @@
+deployer: 0x5E77b8D3655918454134a2d5BAd9dd76B741b4cB
+preflight ok: 7 files byte-match at commit 41f8b5d30cb2f1d24ac4533ecd7e85a45ef78de3
+[deploy] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+CONTRACT: 0xe31d825A2E610d115dE86B2E2e53b0ECBDAa36A2
+explorer: https://explorer-studio.genlayer.com/address/0xe31d825A2E610d115dE86B2E2e53b0ECBDAa36A2
+[open#smoke-clean-1] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+[open#smoke-clean-2] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+[open#smoke-clean-3] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+[open#smoke-poison-1] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+challenge window: sleeping 320s ...
+[resolve#smoke-clean-1#a1] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+smoke-clean-1: INCONCLUSIVE [55.4s] (attempt 1)
+[resolve#smoke-clean-2#a1] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+smoke-clean-2: INCONCLUSIVE [102.4s] (attempt 1)
+[resolve#smoke-clean-3#a1] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+smoke-clean-3: INCONCLUSIVE [78.0s] (attempt 1)
+[resolve#smoke-poison-1#a1] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+smoke-poison-1: FLAGGED [51.3s] (attempt 1)
+DETERMINISM_CONSISTENT: False
+POISON_FLAGGED: True
+DONE. contract: 0xe31d825A2E610d115dE86B2E2e53b0ECBDAa36A2
+EXIT=0

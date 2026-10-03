@@ -50,15 +50,21 @@ on-chain denylist (`is_flagged(digest)` public view).
 
 ## Live deployment (Studionet)
 
-- Contract: `0x2937bf603e4E599a98400ed94fe3568264d1D63b`
+- Contract: `0xe31d825A2E610d115dE86B2E2e53b0ECBDAa36A2` (v1.1)
 - Deployer: `0x5E77b8D3655918454134a2d5BAd9dd76B741b4cB`
 - Deployed-code identity: sha256 of `contracts/toolguard.py` at commit
-  `350077cda374b2febfb4ceb7fc3935e118500a70` equals the deployed
+  `6257214aca891b0e856644ef7883fcb3c9d17f28` equals the deployed
   `contract_code` (proof recorded in `docs/deployment_log.json`)
 - dApp: https://faisalnugroho.github.io/toolguard/
-- Examples pinned at commit `08ad631ead30e501c4ee27683084f1e75d775826`
+- Examples pinned at commit `f4a92b8523b5ef21bf8491782e810662041585be`
   (byte-matched pre-flight before deploy — every pinned URL fetched and
   compared against the local files)
+- v1.0 deployment `0x2937bf60…` was superseded before any audit resolved:
+  its equivalence comparator included citation wording, and the first live
+  round honestly MAJORITY_DISAGREE'd (two model runs phrased the same
+  citation differently). v1.1 re-validates the leader's citations verbatim
+  against pinned bytes but compares only stable decision substance —
+  the LinguaCert-proven shape. The failed round stays on-chain as history.
 
 ## Verification summary (details + tx hashes in docs/deployment_log.json)
 

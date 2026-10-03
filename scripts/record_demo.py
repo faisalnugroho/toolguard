@@ -4,12 +4,15 @@ Opens a REAL on-chain audit from the UI (burner wallet), waits out the
 challenge countdown visually, resolves from the UI, and shows the FLAGGED
 verdict + verbatim citations + on-chain audit list. Saves slow screenshots
 for ffmpeg assembly + a full-speed webm (backup).
+
+NOTE: media lives in ~/toolguard-artifacts (OUTSIDE the repo) because the
+gltest pytest runner wipes ./artifacts relative to the repo cwd.
 """
 import time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
-OUT = Path("/home/ubuntu/toolguard/artifacts/demo_shots"); OUT.mkdir(parents=True, exist_ok=True)
+OUT = Path("/home/ubuntu/toolguard-artifacts/demo_shots"); OUT.mkdir(parents=True, exist_ok=True)
 URL = "https://faisalnugroho.github.io/toolguard/"
 AID = "demo-poisoned-" + time.strftime("%H%M%S")
 SHOT = lambda name: str(OUT / f"{name}.png")
@@ -75,7 +78,7 @@ with sync_playwright() as p:
     ts(pg, "08-audits", 3.0)
 
     # explorer: the audit record is public on-chain evidence
-    pg.goto("https://explorer-studio.genlayer.com/address/0x2937bf603e4E599a98400ed94fe3568264d1D63b",
+    pg.goto("https://explorer-studio.genlayer.com/address/0xe31d825A2E610d115dE86B2E2e53b0ECBDAa36A2",
             wait_until="domcontentloaded")
     pg.wait_for_timeout(9000)
     ts(pg, "09-explorer", 3.0)

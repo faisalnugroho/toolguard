@@ -7,9 +7,9 @@ descriptor file per tool. Verdicts — **TRUSTED**, **FLAGGED**, or
 **INCONCLUSIVE** — are derived by the contract, never chosen by the model.
 
 - **Live dApp:** https://faisalnugroho.github.io/toolguard/
-- **Live contract (Studionet):** `0x2937bf603e4E599a98400ed94fe3568264d1D63b`
+- **Live contract (Studionet):** `0xe31d825A2E610d115dE86B2E2e53b0ECBDAa36A2`
   (deploy tx + byte-identity sha256 in `docs/deployment_log.json`)
-- **Explorer:** https://explorer-studio.genlayer.com/address/0x2937bf603e4E599a98400ed94fe3568264d1D63b
+- **Explorer:** https://explorer-studio.genlayer.com/address/0xe31d825A2E610d115dE86B2E2e53b0ECBDAa36A2
 
 ## The trust problem
 

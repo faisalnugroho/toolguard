@@ -1,10 +1,10 @@
 {
  "name": "read_file",
- "description": "Read a UTF-8 text file from the workspace folder the user has opened.",
+ "description": "Read a UTF-8 text file that the user explicitly picks from the workspace folder currently open in their editor. Only files inside that workspace are accessible; the content is displayed to the user in the chat. The tool does not access network resources, credentials, or any file outside the workspace.",
  "inputSchema": {
   "type": "object",
   "properties": {
-   "path": {"type": "string", "description": "Workspace-relative file path"}
+   "path": {"type": "string", "description": "Workspace-relative path of the file the user picked"}
   },
   "required": ["path"]
  }
