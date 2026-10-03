@@ -260,7 +260,7 @@ async function renderHome(){
   try{
     const stats = await readContract("get_stats", []);
     $("#statsBox").innerHTML = `<div class="stats" style="margin-top:18px">
-      <div class="stat"><strong>${esc(stats.total)}</strong><span>Audits on chain</span></div>
+      <div class="stat"><strong>${esc(stats.total)}</strong><span>Audits resolved on chain</span></div>
       <div class="stat"><strong style="color:var(--green)">${esc(stats.trusted)}</strong><span>Trusted</span></div>
       <div class="stat"><strong style="color:var(--red)">${esc(stats.flagged)}</strong><span>Flagged</span></div>
       <div class="stat"><strong style="color:var(--amber)">${esc(stats.inconclusive)}</strong><span>Inconclusive — fail-safe by design</span></div>
