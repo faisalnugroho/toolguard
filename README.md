@@ -103,9 +103,12 @@ GENVMROOT=/tmp/genvmroot genvm-lint check contracts/toolguard.py
 ## Live smoke evidence (Studionet)
 
 See `docs/deployment_log.json` for the full record: deploy tx + code
-sha256, 3× clean-server audits (determinism: identical TRUSTED verdicts),
-1× poisoned-server audit (FLAGGED, R1+R2+R3 with verbatim citations), every
-tx hash resolvable on the explorer. Run with the challenge-window guard
+sha256, 1× poisoned-server audit (FLAGGED, R1+R2+R3 with verbatim
+citations), and the clean-server arc kept honest on-chain: the v1 clean
+descriptors (unrestricted path input) settled INCONCLUSIVE ×3 under the
+R3 policy, then the restricted v2 descriptors re-audited TRUSTED ×3 —
+identical verdicts, every round round-1 (determinism proven). Every tx
+hash is resolvable on the explorer, with the challenge-window guard
 (300 s, node-clock) enforced on-chain for every audit.
 
 ## License

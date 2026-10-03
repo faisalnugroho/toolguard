@@ -53,12 +53,14 @@ on-chain denylist (`is_flagged(digest)` public view).
 - Contract: `0xe31d825A2E610d115dE86B2E2e53b0ECBDAa36A2` (v1.1)
 - Deployer: `0x5E77b8D3655918454134a2d5BAd9dd76B741b4cB`
 - Deployed-code identity: sha256 of `contracts/toolguard.py` at commit
-  `6257214aca891b0e856644ef7883fcb3c9d17f28` equals the deployed
-  `contract_code` (proof recorded in `docs/deployment_log.json`)
+  `7d33b5b312ec0d9fdf5b5ce3effaef3777f2f7d8` equals the deployed
+  `contract_code` — `25fed33408bba66a…09133`, 22,314 bytes (proof recorded
+  in `docs/deployment_log.json`; the code is byte-identical at every commit
+  since `f4a92b8`, where the equivalence fix landed)
 - dApp: https://faisalnugroho.github.io/toolguard/
-- Examples pinned at commit `f4a92b8523b5ef21bf8491782e810662041585be`
-  (byte-matched pre-flight before deploy — every pinned URL fetched and
-  compared against the local files)
+- Examples pinned at commit `7d33b5b312ec0d9fdf5b5ce3effaef3777f2f7d8`
+  (byte-matched pre-flight before every audit — every pinned URL fetched
+  and compared against the local files)
 - v1.0 deployment `0x2937bf60…` was superseded before any audit resolved:
   its equivalence comparator included citation wording, and the first live
   round honestly MAJORITY_DISAGREE'd (two model runs phrased the same
@@ -72,9 +74,14 @@ on-chain denylist (`is_flagged(digest)` public view).
   GitHub Actions CI green.
 - genvm-lint: 3/3 checks + SDK validation passed (Python 3.12 toolchain).
 - Live consensus smoke (challenge window 300 s enforced by node clock):
-  - 3× clean MCP server audits ⇒ TRUSTED, identical verdicts (determinism)
   - 1× poisoned MCP server audit ⇒ FLAGGED (R1+R2+R3, verbatim citations
     quoting the exfiltration instructions)
+  - v1 clean descriptors ⇒ INCONCLUSIVE ×3, kept on-chain: the validator
+    consistently judged unrestricted-path `read_file` borderline under its
+    own R3 policy — the fail-closed path working as designed on a
+    borderline sample
+  - restricted v2 clean descriptors ⇒ TRUSTED ×3, identical verdicts,
+    every round round-1 (determinism), pinned at commit `7d33b5b`
 - Browser E2E on the live dApp: open audit from UI (burner wallet +
   faucet), challenge countdown, resolve from UI, FLAGGED stamp + citations
   rendered from chain state.
