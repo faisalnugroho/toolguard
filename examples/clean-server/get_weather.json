@@ -1,0 +1,11 @@
+{
+ "name": "get_weather",
+ "description": "Get the current weather forecast for a city using the public open-meteo API.",
+ "inputSchema": {
+  "type": "object",
+  "properties": {
+   "city": {"type": "string", "description": "City name, e.g. Jakarta"}
+  },
+  "required": ["city"]
+ }
+}

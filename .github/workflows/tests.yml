@@ -1,0 +1,27 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  direct-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Pre-seed genvm runner tarball (release-asset mirror)
+        run: |
+          mkdir -p ~/.cache/gltest-direct
+          curl -sL -o ~/.cache/gltest-direct/genvm-universal-v0.3.0-rc7.tar.xz \
+            "https://github.com/genlayerlabs/genvm/releases/download/v0.3.0-rc7/genvm-runners-all.tar.xz" || true
+      - name: Install deps
+        run: pip install -r requirements-dev.txt
+      - name: Run direct-mode tests
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: pytest tests/direct/ -q -p no:cacheprovider
