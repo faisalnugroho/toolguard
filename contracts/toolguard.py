@@ -233,12 +233,17 @@ def normalize(raw, documents, manifest, findings, tool_count):
 
 
 def equivalent(proposed, independent):
-    """Compare stable decision substance; free-form reason may differ."""
+    """Compare stable decision substance; free-form reason and citation
+    wording may differ across model runs. The leader's citations are
+    re-validated verbatim against fresh pinned bytes in the validator path
+    (normalize re-runs the same filter) — including them in equivalence
+    would make a decisive word-difference reject an otherwise identical
+    audit (live: MAJORITY_DISAGREE on a TRUSTED x3)."""
     if not isinstance(proposed, dict) or not isinstance(independent, dict):
         return False
     return all(proposed.get(k) == independent.get(k)
                for k in ("verdict", "labels", "manifest", "findings",
-                         "citations", "tool_names"))
+                         "tool_names"))
 
 
 class ToolGuard(gl.Contract):
