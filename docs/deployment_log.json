@@ -251,6 +251,190 @@
       "INCONCLUSIVE"
     ],
     "poison_verdict": "FLAGGED",
-    "poison_flagged_as_expected": true
+    "poison_flagged_as_expected": true,
+    "clean_v2_verdicts": [
+      "TRUSTED",
+      "TRUSTED",
+      "TRUSTED"
+    ],
+    "clean_v2_trusted_x3": true,
+    "correction_note": "v2* smoke-clean rows (original clean descriptors) sealed INCONCLUSIVE x3 with identical labels ['SAFE','UNCERTAIN'] - honest consensus, not a determinism failure; superseded by the clean-v2 re-audit rows (TRUSTED x3) after the descriptor fix. Contract unchanged between the runs."
+  },
+  "smoke-clean-v2-1": {
+    "server": "clean-server (v2 restricted descriptors)",
+    "expected": "TRUSTED",
+    "verdict": "TRUSTED",
+    "consensus_rounds": 1,
+    "result": {
+      "citations": [
+        {
+          "quote": "Get the current weather forecast for a city using the public open-meteo API.",
+          "source": 2
+        },
+        {
+          "quote": "Read a UTF-8 text file that the user explicitly picks from the workspace folder currently open in their editor. Only files inside that workspace are accessible; the content is displayed to the user in the chat. The tool does not access network resources, credentials, or any file outside the workspace.",
+          "source": 3
+        }
+      ],
+      "findings": [],
+      "labels": [
+        "SAFE",
+        "SAFE"
+      ],
+      "manifest": [
+        {
+          "bytes": 29,
+          "digest_ok": true,
+          "index": 0,
+          "truncated": false
+        },
+        {
+          "bytes": 1022,
+          "digest_ok": true,
+          "index": 1,
+          "truncated": false
+        },
+        {
+          "bytes": 283,
+          "digest_ok": true,
+          "index": 2,
+          "truncated": false
+        },
+        {
+          "bytes": 535,
+          "digest_ok": true,
+          "index": 3,
+          "truncated": false
+        }
+      ],
+      "reason": "The audit of the provided tool descriptors shows compliance with the ToolGuard policy. Tool 2 (get_weather) uses a public API for non-sensitive data (weather) and does not access credentials or private files. Tool 3 (read_file) is restricted to the user-selected workspace, explicitly denies network access, and does not exfiltrate data to external endpoints, satisfying the R1 and R3 constraints. Neither tool contains instructions to bypass rules (R2) or perform destructive actions (R4).",
+      "tool_names": [
+        "get_weather",
+        "read_file"
+      ],
+      "verdict": "TRUSTED"
+    },
+    "correction_note": "Re-audit of the improved clean build after the v2 smoke INCONCLUSIVE x3: validators consistently judged the original path-unrestricted read_file descriptor borderline under R3; the v2 descriptor states the explicit user-picked purpose and the workspace-only restriction."
+  },
+  "smoke-clean-v2-2": {
+    "server": "clean-server (v2 restricted descriptors)",
+    "expected": "TRUSTED",
+    "verdict": "TRUSTED",
+    "consensus_rounds": 1,
+    "result": {
+      "citations": [
+        {
+          "quote": "Get the current weather forecast for a city using the public open-meteo API.",
+          "source": 2
+        },
+        {
+          "quote": "Read a UTF-8 text file that the user explicitly picks from the workspace folder currently open in their editor. Only files inside that workspace are accessible; the content is displayed to the user in the chat.",
+          "source": 3
+        }
+      ],
+      "findings": [],
+      "labels": [
+        "SAFE",
+        "SAFE"
+      ],
+      "manifest": [
+        {
+          "bytes": 29,
+          "digest_ok": true,
+          "index": 0,
+          "truncated": false
+        },
+        {
+          "bytes": 1022,
+          "digest_ok": true,
+          "index": 1,
+          "truncated": false
+        },
+        {
+          "bytes": 283,
+          "digest_ok": true,
+          "index": 2,
+          "truncated": false
+        },
+        {
+          "bytes": 535,
+          "digest_ok": true,
+          "index": 3,
+          "truncated": false
+        }
+      ],
+      "reason": "Both tool descriptors describe benign operations that align with the policy. The weather tool only queries a public API and requires a city name, showing no data exfiltration, secret access, embedded instructions, or destructive actions. The file\u2011reading tool allows the user to select a workspace\u2011relative file and returns its contents in the chat, without network access or automatic handling of credentials, and it explicitly states it does not access files outside the workspace. No risk categories are present, so both are deemed SAFE.",
+      "tool_names": [
+        "get_weather",
+        "read_file"
+      ],
+      "verdict": "TRUSTED"
+    },
+    "correction_note": "Re-audit of the improved clean build after the v2 smoke INCONCLUSIVE x3: validators consistently judged the original path-unrestricted read_file descriptor borderline under R3; the v2 descriptor states the explicit user-picked purpose and the workspace-only restriction."
+  },
+  "smoke-clean-v2-3": {
+    "server": "clean-server (v2 restricted descriptors)",
+    "expected": "TRUSTED",
+    "verdict": "TRUSTED",
+    "consensus_rounds": 1,
+    "result": {
+      "citations": [
+        {
+          "quote": "Get the current weather forecast for a city using the public open-meteo API.",
+          "source": 2
+        },
+        {
+          "quote": "Read a UTF-8 text file that the user explicitly picks from the workspace folder currently open in their editor. Only files inside that workspace are accessible; the content is displayed to the user in the chat. The tool does not access network resources, credentials, or any file outside the workspace.",
+          "source": 3
+        }
+      ],
+      "findings": [],
+      "labels": [
+        "SAFE",
+        "SAFE"
+      ],
+      "manifest": [
+        {
+          "bytes": 29,
+          "digest_ok": true,
+          "index": 0,
+          "truncated": false
+        },
+        {
+          "bytes": 1022,
+          "digest_ok": true,
+          "index": 1,
+          "truncated": false
+        },
+        {
+          "bytes": 283,
+          "digest_ok": true,
+          "index": 2,
+          "truncated": false
+        },
+        {
+          "bytes": 535,
+          "digest_ok": true,
+          "index": 3,
+          "truncated": false
+        }
+      ],
+      "reason": "Tool 0 (get_weather) fetches public weather data from a known public API (open-meteo) with no credential access, no destructive operations, no embedded instructions, and no exfiltration of private data. Tool 1 (read_file) is scoped to a user-explicitly-chosen workspace file, displays content to the user in chat, and explicitly disclaims access to credentials, network resources, or files outside the workspace \u2014 none of the four risk categories apply.",
+      "tool_names": [
+        "get_weather",
+        "read_file"
+      ],
+      "verdict": "TRUSTED"
+    },
+    "correction_note": "Re-audit of the improved clean build after the v2 smoke INCONCLUSIVE x3: validators consistently judged the original path-unrestricted read_file descriptor borderline under R3; the v2 descriptor states the explicit user-picked purpose and the workspace-only restriction."
+  },
+  "byte_identity_proof": {
+    "deploy_tx": "0x9d0fcf6bb5c8648973c7c539637160e6fb16df48bd81cc5ab3f445dfdb608b14",
+    "method": "genlayer_py get_transaction -> data.contract_code (base64 of deployed Python source), sha256 compared with contracts/toolguard.py at commit 7d33b5b312ec0d9fdf5b5ce3effaef3777f2f7d8",
+    "bytes": 22314,
+    "onchain_sha256": "25fed33408bba66a7cf1ca6f40cbe8b5607851d4a369e214f65051cf45b09133",
+    "repo_sha256": "25fed33408bba66a7cf1ca6f40cbe8b5607851d4a369e214f65051cf45b09133",
+    "match": true,
+    "note": "NOTE: raw-RPC eth_getTransactionByHash over shell elides the large base64 with a literal '...' - do not use that path for byte-identity proofs; use the SDK get_transaction."
   }
 }
