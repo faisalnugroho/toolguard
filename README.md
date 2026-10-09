@@ -7,9 +7,11 @@ descriptor file per tool. Verdicts — **TRUSTED**, **FLAGGED**, or
 **INCONCLUSIVE** — are derived by the contract, never chosen by the model.
 
 - **Live dApp:** https://faisalnugroho.github.io/toolguard/
-- **Live contract (Studionet):** `0xe31d825A2E610d115dE86B2E2e53b0ECBDAa36A2`
-  (deploy tx + byte-identity sha256 in `docs/deployment_log.json`)
-- **Explorer:** https://explorer-studio.genlayer.com/address/0xe31d825A2E610d115dE86B2E2e53b0ECBDAa36A2
+- **Live contract (Studionet, v1.2):** `0x4Cc370E1cCa8B771C95b79Ba7bD1eB55716DF16C`
+  (deploy tx + byte-identity sha256 in `docs/deployment_log.json`;
+  v1.1 `0xe31d825A…36A2` and its archived log in
+  `docs/deployment_log_v1.1.json` remain on-chain as history)
+- **Explorer:** https://explorer-studio.genlayer.com/address/0x4Cc370E1cCa8B771C95b79Ba7bD1eB55716DF16C
 
 ## The trust problem
 
@@ -123,14 +125,18 @@ genvm-lint (needs Python 3.12 + GENVMROOT):
 GENVMROOT=/tmp/genvmroot genvm-lint check contracts/toolguard.py
 ```
 
-## Live smoke evidence (Studionet)
+## Live smoke evidence (Studionet, v1.2 @ 0x4Cc370E1…DF16C)
 
 See `docs/deployment_log.json` for the full record: deploy tx + code
-sha256, 1× poisoned-server audit (FLAGGED, R1+R2+R3 with verbatim
-citations), and the clean-server arc kept honest on-chain: the v1 clean
-descriptors (unrestricted path input) settled INCONCLUSIVE ×3 under the
-R3 policy, then the restricted v2 descriptors re-audited TRUSTED ×3 —
-identical verdicts, every round round-1 (determinism proven). Every tx
+sha256 (byte-identity proven vs HEAD), 1× poisoned-server audit (FLAGGED,
+R1+R2+R3 with verbatim citations), the clean-server arc TRUSTED ×3
+(identical verdicts, every round round-1 — determinism proven), and the
+v1.2 lifecycle row: the same poisoned bundle audited twice records the
+FLAGGED registry entry canonically (names + digests, suspicious members
+only, `get_flag_report`/`get_latest_verdict` live reads in the log). The
+dispute row honestly resolved FLAGGED again (the poisoned content is
+unambiguous — the TRUSTED-correction sweep is consensus-gated and its
+deterministic behavior is proven by the local suite instead). Every tx
 hash is resolvable on the explorer, with the challenge-window guard
 (300 s, node-clock) enforced on-chain for every audit.
 

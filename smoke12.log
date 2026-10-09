@@ -1,0 +1,27 @@
+deployer: 0x5E77b8D3655918454134a2d5BAd9dd76B741b4cB
+preflight ok: 7 files byte-match at commit e6fb9f7710e134cf38bcf6c36739fbe777f59cd7
+[deploy] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+CONTRACT: 0x4Cc370E1cCa8B771C95b79Ba7bD1eB55716DF16C
+explorer: https://explorer-studio.genlayer.com/address/0x4Cc370E1cCa8B771C95b79Ba7bD1eB55716DF16C
+[open#smoke-clean-1] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+[open#smoke-clean-2] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+[open#smoke-clean-3] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+[open#smoke-poison-1] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+[open#smoke-dispute-trust] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+challenge window: sleeping 320s ...
+[resolve#smoke-clean-1#a1] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+smoke-clean-1: TRUSTED [50.1s] (attempt 1)
+[resolve#smoke-clean-2#a1] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+smoke-clean-2: TRUSTED [52.5s] (attempt 1)
+[resolve#smoke-clean-3#a1] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+smoke-clean-3: TRUSTED [210.7s] (attempt 1)
+[resolve#smoke-poison-1#a1] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+smoke-poison-1: FLAGGED [57.2s] (attempt 1)
+[resolve#smoke-dispute-trust#a1] FINALIZED vote=MAJORITY_AGREE exec=SUCCESS ok=True
+smoke-dispute-trust: FLAGGED [136.3s] (attempt 1)
+FLAG_REPORT: {"digest": "315b6fed31531222ab55255daf5f9e52f0d56591bf1a7fca2d9f9f8c6a3afcdb", "flag_count": 1, "flags": [{"audit_id": "smoke-dispute-trust", "binding_sha256": "e556315d39cb8da8f519707822e43c28ee1392883a24963cc2fb31e3b1f3dc0e", "corrected_by": "", "dispute_outcome": "", "disputed": false, "manifest_digest": "1ea656ebef13bf6cd8c5561005bb95951dca886103f9354f74cc96fef1f3b75d", "resolved_at": 17915382
+DETERMINISM_CONSISTENT: True
+POISON_FLAGGED: True
+DISPUTE_ROW: FLAGGED (no verdict divergence)
+DONE. contract: 0x4Cc370E1cCa8B771C95b79Ba7bD1eB55716DF16C
+SMOKE_EXIT=0

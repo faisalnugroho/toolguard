@@ -65,19 +65,20 @@ Fail-closed: missing/tampered/oversized/thin documents ⇒ INCONCLUSIVE.
 
 ## Live deployment (Studionet)
 
-- Contract: `0xe31d825A2E610d115dE86B2E2e53b0ECBDAa36A2` (v1.1 live;
-  **v1.2 — this steward round — is validated locally, NOT yet redeployed**;
-  redeploy + fresh smoke precede resubmission)
-- Deployer: `0x5E77b8D3655918454134a2d5BAd9dd76B741b4cB`
-- Deployed-code identity: sha256 of `contracts/toolguard.py` at commit
-  `7d33b5b312ec0d9fdf5b5ce3effaef3777f2f7d8` equals the deployed
-  `contract_code` — `25fed33408bba66a…09133`, 22,314 bytes (proof recorded
-  in `docs/deployment_log.json`; the code is byte-identical at every commit
-  since `f4a92b8`, where the equivalence fix landed)
+- **Live contract (Studionet, v1.2):** `0x4Cc370E1cCa8B771C95b79Ba7bD1eB55716DF16C`
+  (deploy tx `0x4c89ceda…8b513`; deployed-code sha256 `604380df…2bbd` =
+  repo HEAD — byte-identity proven via `genlayer_py get_transaction`;
+  v1.1 `0xe31d825A…36A2` + archived log `docs/deployment_log_v1.1.json`
+  remain on-chain as history)
+- Deployer: `0x5E77b8D3655918454134a2d5BAd9dd76B741b4cB` (same key as the
+  v1.1 deploy)
+- Historical: v1.1's deployed-code identity at commit `7d33b5b…` was
+  `25fed33408bba66a…09133`, 22,314 bytes (archived proof in
+  `docs/deployment_log_v1.1.json`)
 - dApp: https://faisalnugroho.github.io/toolguard/
-- Examples pinned at commit `7d33b5b312ec0d9fdf5b5ce3effaef3777f2f7d8`
-  (byte-matched pre-flight before every audit — every pinned URL fetched
-  and compared against the local files)
+- Examples pinned at the deployment commit `e6fb9f7…` (byte-matched
+  pre-flight before every audit — every pinned URL fetched and compared
+  against the local files; 7/7 byte-match)
 - v1.0 deployment `0x2937bf60…` was superseded before any audit resolved:
   its equivalence comparator included citation wording, and the first live
   round honestly MAJORITY_DISAGREE'd (two model runs phrased the same
