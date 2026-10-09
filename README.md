@@ -30,11 +30,14 @@ final verdict is an on-chain record other contracts and UIs can query with
 ## Two independent decision layers
 
 1. **Deterministic lint** (contract-computed, model-independent): the
-   manifest must be a JSON array matching the submitted tools; every tool
-   descriptor must be valid JSON with a name and a usable description;
-   duplicate tool names (shadowing/override attacks) are findings; oversized
-   descriptors are caught at the budget gate. Any finding forces
-   **FLAGGED** regardless of what the model says.
+   manifest must be a JSON array of names whose entries EQUAL, in order,
+   the names inside the submitted descriptor files (canonical identity
+   binding — enforced against the names declared at open_audit AND the
+   names parsed from the fetched pinned bytes); every tool descriptor must
+   be valid JSON with a name and a usable description; duplicate tool
+   names (shadowing/override attacks) are findings; oversized descriptors
+   are caught at the budget gate. Any finding forces **FLAGGED** regardless
+   of what the model says.
 2. **LLM judgment with verbatim citations**: per-tool
    SAFE/SUSPICIOUS/UNCERTAIN labels over four risk categories (R1 data
    exfiltration, R2 embedded instructions, R3 credential/secret access,
@@ -45,8 +48,28 @@ final verdict is an on-chain record other contracts and UIs can query with
 
 Fail-safe: any missing, tampered, oversized or thin document fails closed
 to **INCONCLUSIVE** — never audited by prefix, never trusted by default.
-Flagged audits register the manifest digest (and the individual digest of
-every tool labeled SUSPICIOUS) in an on-chain denylist queryable by anyone.
+
+## Registry lifecycle (disputable flags, bounded capacity)
+
+A FLAGGED verdict registers the audit's artifact **bundle** under a
+content-derived `binding_sha256` (sha256 over manifest digest + policy
+digest + ordered tool digests). The entry canonically binds the manifest
+digest, the exact submitted tool names AND digests, and only the digests of
+tools individually labeled SUSPICIOUS. Entries are never silently
+permanent:
+
+- a later audit of the SAME bundle resolving TRUSTED records a correction
+  dispute against the earlier flag (`get_flag_report` exposes `disputed`;
+  `correct_flag` can record it explicitly — owner-only for 90 days after
+  the flag, then permissionless);
+- `get_latest_verdict(manifest_digest)` points at the latest decisive
+  audit; `is_flagged` keeps its boolean for compatibility but the report
+  view carries the dispute state consumers need.
+
+The shared 100-audit registry is protected against permissionless
+exhaustion: max 5 OPEN audits per owner (slots release on resolve), max 5
+audits per identical bundle (keyed by `binding_sha256`, so fresh audit ids
+cannot bypass it), plus the global cap.
 
 ## Why GenLayer is necessary
 
@@ -80,7 +103,7 @@ build's submitted artifacts", never "impossible".
 
 ```
 contracts/toolguard.py     Intelligent Contract (Studionet, deployed)
-tests/direct/              60 real-GenVM direct-mode tests (web/LLM mocked)
+tests/direct/              77 real-GenVM direct-mode tests (web/LLM mocked)
 examples/                  clean-server/ · poisoned-server/ · policy.md
 frontend/index.html        single-file dApp (GitHub Pages, burner wallets)
 scripts/deploy_smoke.py    deploy + live consensus smoke (pre-flight, determinism 3×)

@@ -155,11 +155,16 @@ def main():
         tools = []
         for name in ("get_weather.json", "read_file.json"):
             body = Path("examples", server_dir, name).read_text()
-            tools.append({"url": pinned(commit, f"{server_dir}/{name}"),
+            # v1.2: each entry canonically binds the descriptor's tool NAME
+            # to its pinned digest (checked again at resolve).
+            tool_name = json.loads(body).get("name") or name[:-5]
+            tools.append({"name": tool_name,
+                          "url": pinned(commit, f"{server_dir}/{name}"),
                           "digest": sha(body)})
         return json.dumps(tools)
 
     audits = [
+        # v1.1-comparability rows (clean TRUSTED x3, poison FLAGGED x1)
         ("smoke-clean-1", "Clean MCP server (2 tools)", "clean-server",
          clean_manifest, "TRUSTED"),
         ("smoke-clean-2", "Clean MCP server (2 tools)", "clean-server",
@@ -168,6 +173,17 @@ def main():
          clean_manifest, "TRUSTED"),
         ("smoke-poison-1", "Poisoned MCP server (exfil tool)",
          "poisoned-server", poisoned_manifest, "FLAGGED"),
+        # v1.2 lifecycle rows: the SAME poisoned bundle audited twice.
+        # Row A genuinely flags (deterministic exfil content). Row B is the
+        # competing-opinion slot: if the model rejudges SAFE it resolves
+        # TRUSTED and the on-chain correction sweep fires; if it re-flags,
+        # the row honestly records FLAGGED again (lifecycle_ok=False) —
+        # the dispute sweep is consensus-gated, not script-guaranteed.
+        # Deterministic coverage of the sweep lives in tests/direct.
+        ("smoke-dispute-flag", "Poisoned server (dispute A)",
+         "poisoned-server", poisoned_manifest, "FLAGGED"),
+        ("smoke-dispute-trust", "Poisoned server (dispute B)",
+         "poisoned-server", poisoned_manifest, "TRUSTED-or-FLAGGED"),
     ]
 
     # Phase 1: open every audit; challenge clocks run in parallel.
@@ -222,15 +238,23 @@ def main():
               len(set(clean_results)) == 1 and clean_results[0] == "TRUSTED")
     poison_verdict = verdicts.get("smoke-poison-1")
 
+    dispute_flag = verdicts.get("smoke-dispute-flag")
+    dispute_trust = verdicts.get("smoke-dispute-trust")
+    lifecycle_ok = (dispute_flag == "FLAGGED" and dispute_trust == "TRUSTED")
     log["results"] = {
         "determinism_consistent": ok_det,
         "clean_verdicts": clean_results,
         "poison_verdict": poison_verdict,
         "poison_flagged_as_expected": poison_verdict == "FLAGGED",
+        "dispute_flag_verdict": dispute_flag,
+        "dispute_trust_verdict": dispute_trust,
+        "dispute_lifecycle_ok": lifecycle_ok,
     }
     Path("docs/deployment_log.json").write_text(json.dumps(log, indent=2))
     print("DETERMINISM_CONSISTENT:", ok_det)
     print("POISON_FLAGGED:", poison_verdict == "FLAGGED")
+    print("DISPUTE_ROWS:", dispute_flag, "->", dispute_trust,
+          "(sweep fired)" if lifecycle_ok else "(no verdict divergence)")
     print("DONE. contract:", addr)
 
 

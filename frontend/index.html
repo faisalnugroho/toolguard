@@ -323,7 +323,30 @@ async function renderAudit(id){
   try{ r = await readContract("get_audit", [id]); }
   catch(e){ $("#auditBox").innerHTML = '<p class="statusline err">'+esc(e.message)+'</p>'; return; }
   const open = r.status==="OPEN";
-  const toolRows = (r.tools||[]).map(t=>`<div class="kv"><div class="k">TOOL</div><div><a href="${esc(t.url)}" target="_blank" rel="noopener" class="mono">${esc(t.url.split("/").pop())}</a><br><span class="mono dim">sha256 ${esc(t.digest)}</span></div></div>`).join("");
+  const toolRows = (r.tools||[]).map(t=>`<div class="kv"><div class="k">TOOL${t.name?' · <span class="mono">'+esc(t.name)+'</span>':''}</div><div><a href="${esc(t.url)}" target="_blank" rel="noopener" class="mono">${esc(t.url.split("/").pop())}</a><br><span class="mono dim">sha256 ${esc(t.digest)}</span></div></div>`).join("");
+  // Registry state for this audit's digests: a FLAGGED record may carry a
+  // correction dispute (never silently permanent). Defensive: the flag
+  // report fields are optional — a v1.1 chain simply renders no dispute line.
+  if(r.status==="RESOLVED"){
+    Promise.all([
+      readContract("get_flag_report", [r.manifest.digest]).catch(()=>null),
+      ...((r.tools||[]).map(t=>readContract("get_flag_report", [t.digest]).catch(()=>null))),
+    ]).then(reports=>{
+      const box = $("#flagState");
+      if(!box) return;
+      const hits = (reports||[]).filter(Boolean)
+        .flatMap(rep=>{ try{ return (JSON.parse(rep).flags)||[]; }catch(e){ return []; } });
+      if(!hits.length) return;
+      box.innerHTML = `<h2 style="margin-top:16px">Registry</h2>` + hits.map(f=>{
+        const disputed = f.disputed===true;
+        return `<div class="kv"><div class="k">FLAG · ${esc(String(f.audit_id||"").slice(0,24))}</div><div>` +
+          (disputed
+            ? `<span style="color:var(--amber,#b45309)">DISPUTED</span> — corrected by a later TRUSTED audit of the same bundle (<span class="mono">${esc(String(f.corrected_by||""))}</span>)`
+            : `Registered — no dispute recorded`) +
+          `</div></div>`;
+      }).join("");
+    });
+  }
   app.innerHTML = `<p><a href="#/audits" data-nav>← All audits</a></p>
   <div class="card">
     <p class="eyebrow">AUDIT RECORD · LIVE FROM ${esc(CONTRACT_ADDR.slice(0,10))}…</p>
@@ -335,7 +358,7 @@ async function renderAudit(id){
       <div class="k">POLICY</div><div><a href="${esc(r.policy.url)}" target="_blank" rel="noopener" class="mono">${esc(r.policy.url)}</a><br><span class="mono dim">sha256 ${esc(r.policy.digest)}</span></div>
     </div>
     ${toolRows}
-    ${r.status==="RESOLVED" ? resultHTML(r) : `
+    ${r.status==="RESOLVED" ? resultHTML(r) + '<div id="flagState"></div>' : `
       <h2 style="margin-top:16px">Not resolved yet</h2>
       <p id="cd" class="countdown"></p>
       ${open?'<button class="btn" id="resolveBtn">Resolve on-chain</button> <span class="dim" style="font-size:12.5px">Permissionless — anyone may resolve after the challenge deadline.</span>':'<p class="dim">This audit is terminal.</p>'}
@@ -426,8 +449,10 @@ async function renderRun(){
       $("#manifestDigest").textContent = await sha256Hex(m);
       $("#policyDigest").textContent = await sha256Hex(p);
       const tools = [
-        { url: RAW + d.dir + "/get_weather.json", digest: await sha256Hex(t0) },
-        { url: RAW + d.dir + "/read_file.json", digest: await sha256Hex(t1) },
+        { name: (JSON.parse(t0)||{}).name || "get_weather",
+          url: RAW + d.dir + "/get_weather.json", digest: await sha256Hex(t0) },
+        { name: (JSON.parse(t1)||{}).name || "read_file",
+          url: RAW + d.dir + "/read_file.json", digest: await sha256Hex(t1) },
       ];
       $("#toolDigests").textContent = "get_weather.json, read_file.json — pinned";
       $("#openBtn").dataset.tools = JSON.stringify(tools);

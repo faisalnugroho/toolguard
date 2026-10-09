@@ -35,22 +35,39 @@ is deterministic Python: gates, lint, citation re-validation, registry.
 
 ## Architecture (two independent decision layers)
 
-1. **Deterministic lint** — manifest must be a JSON array matching the
-   submitted tools; every descriptor valid JSON with name + description;
-   duplicate tool names (shadowing) are findings; budget gate catches
-   oversized documents. Any finding ⇒ FLAGGED, model-independent.
+1. **Deterministic lint** — the manifest must be a JSON array of names
+   EQUAL, in order, to the names inside the submitted descriptor files
+   (canonical identity binding, declared per-entry at open_audit as
+   {name, url, digest} and re-checked at resolve over the fetched pinned
+   bytes); every descriptor valid JSON with name + description; duplicate
+   tool names (shadowing) are findings; budget gate catches oversized
+   documents. Any finding ⇒ FLAGGED, model-independent.
 2. **LLM + verbatim citations** — per-tool SAFE/SUSPICIOUS/UNCERTAIN over
    R1 exfiltration / R2 embedded instructions / R3 credential access /
    R4 destructive operations. SAFE/SUSPICIOUS without a verbatim quote of
    that tool's own descriptor ⇒ demoted to UNCERTAIN on-chain.
 
 Fail-closed: missing/tampered/oversized/thin documents ⇒ INCONCLUSIVE.
-FLAGGED registers the manifest digest + each SUSPICIOUS tool digest in an
-on-chain denylist (`is_flagged(digest)` public view).
+
+## Registry lifecycle (steward round, Oct 2026)
+
+- **Canonical binding:** a FLAGGED verdict registers the artifact BUNDLE
+  under a content-derived `binding_sha256`; the entry binds the manifest
+  digest, the exact submitted tool names AND digests, and only the
+  individually-SUSPICIOUS tool digests (`get_flag_report(digest)`).
+- **Disputable flags:** a later TRUSTED audit of the SAME bundle records a
+  correction dispute against the earlier flag (resolve-time sweep +
+  explicit `correct_flag`, owner-only for 90 days then permissionless).
+  Flags are never deleted and never silently permanent.
+- **Capacity controls:** max 5 OPEN audits per owner (released on
+  resolve), max 5 audits per identical bundle (keyed by `binding_sha256` —
+  audit-id recycling cannot bypass it), global 100-audit cap retained.
 
 ## Live deployment (Studionet)
 
-- Contract: `0xe31d825A2E610d115dE86B2E2e53b0ECBDAa36A2` (v1.1)
+- Contract: `0xe31d825A2E610d115dE86B2E2e53b0ECBDAa36A2` (v1.1 live;
+  **v1.2 — this steward round — is validated locally, NOT yet redeployed**;
+  redeploy + fresh smoke precede resubmission)
 - Deployer: `0x5E77b8D3655918454134a2d5BAd9dd76B741b4cB`
 - Deployed-code identity: sha256 of `contracts/toolguard.py` at commit
   `7d33b5b312ec0d9fdf5b5ce3effaef3777f2f7d8` equals the deployed
@@ -70,8 +87,11 @@ on-chain denylist (`is_flagged(digest)` public view).
 
 ## Verification summary (details + tx hashes in docs/deployment_log.json)
 
-- 60/60 direct-mode GenVM tests (mocked web/LLM boundaries) — local AND
-  GitHub Actions CI green.
+- 77/77 direct-mode GenVM tests (mocked web/LLM boundaries) — including
+  the steward-round suite: canonical binding mismatches (manifest vs
+  descriptors, declared vs fetched names), competing audit results with
+  recorded disputes, correct_flag gate matrix, and the capacity controls
+  (per-owner OPEN cap, per-bundle cap by binding, global cap).
 - genvm-lint: 3/3 checks + SDK validation passed (Python 3.12 toolchain).
 - Live consensus smoke (challenge window 300 s enforced by node clock):
   - 1× poisoned MCP server audit ⇒ FLAGGED (R1+R2+R3, verbatim citations
