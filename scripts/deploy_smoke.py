@@ -173,15 +173,14 @@ def main():
          clean_manifest, "TRUSTED"),
         ("smoke-poison-1", "Poisoned MCP server (exfil tool)",
          "poisoned-server", poisoned_manifest, "FLAGGED"),
-        # v1.2 lifecycle rows: the SAME poisoned bundle audited twice.
-        # Row A genuinely flags (deterministic exfil content). Row B is the
-        # competing-opinion slot: if the model rejudges SAFE it resolves
-        # TRUSTED and the on-chain correction sweep fires; if it re-flags,
-        # the row honestly records FLAGGED again (lifecycle_ok=False) —
-        # the dispute sweep is consensus-gated, not script-guaranteed.
-        # Deterministic coverage of the sweep lives in tests/direct.
-        ("smoke-dispute-flag", "Poisoned server (dispute A)",
-         "poisoned-server", poisoned_manifest, "FLAGGED"),
+        # v1.2 lifecycle row: the SAME poisoned bundle audited once more.
+        # smoke-poison-1 is the earlier FLAG; if this row's consensus comes
+        # back TRUSTED, the on-chain correction sweep fires against it; if
+        # the model re-flags, the row honestly records FLAGGED again
+        # (sweep is consensus-gated, deterministic coverage lives in
+        # tests/direct). Note: this is the 5th OPEN from this owner —
+        # exactly at MAX_OPEN_PER_OWNER, do not add more opens before a
+        # resolve releases a slot.
         ("smoke-dispute-trust", "Poisoned server (dispute B)",
          "poisoned-server", poisoned_manifest, "TRUSTED-or-FLAGGED"),
     ]
@@ -238,23 +237,41 @@ def main():
               len(set(clean_results)) == 1 and clean_results[0] == "TRUSTED")
     poison_verdict = verdicts.get("smoke-poison-1")
 
-    dispute_flag = verdicts.get("smoke-dispute-flag")
     dispute_trust = verdicts.get("smoke-dispute-trust")
-    lifecycle_ok = (dispute_flag == "FLAGGED" and dispute_trust == "TRUSTED")
+    sweep_fired = (poison_verdict == "FLAGGED"
+                   and dispute_trust == "TRUSTED")
     log["results"] = {
         "determinism_consistent": ok_det,
         "clean_verdicts": clean_results,
         "poison_verdict": poison_verdict,
         "poison_flagged_as_expected": poison_verdict == "FLAGGED",
-        "dispute_flag_verdict": dispute_flag,
         "dispute_trust_verdict": dispute_trust,
-        "dispute_lifecycle_ok": lifecycle_ok,
+        "correction_sweep_fired": sweep_fired,
     }
+    # Live registry reads (v1.2 lifecycle evidence): the poisoned tool
+    # digest's flag report must show disputed=True + corrected_by when the
+    # sweep fired; the manifest index must point at the latest decisive
+    # audit bundle.
+    poison_tool_digest = sha(Path(
+        "examples/poisoned-server/read_file.json").read_text())
+    try:
+        report = client.read_contract(
+            address=addr, function_name="get_flag_report",
+            args=[poison_tool_digest])
+        log["registry_reads"] = {
+            "poison_tool_digest": poison_tool_digest,
+            "flag_report": json.loads(
+                report if isinstance(report, str) else str(report)),
+        }
+        print("FLAG_REPORT:", str(report)[:400], flush=True)
+    except Exception as exc:
+        log["registry_reads"] = {"error": str(exc)[:200]}
+        print("FLAG_REPORT read failed:", exc, flush=True)
     Path("docs/deployment_log.json").write_text(json.dumps(log, indent=2))
     print("DETERMINISM_CONSISTENT:", ok_det)
     print("POISON_FLAGGED:", poison_verdict == "FLAGGED")
-    print("DISPUTE_ROWS:", dispute_flag, "->", dispute_trust,
-          "(sweep fired)" if lifecycle_ok else "(no verdict divergence)")
+    print("DISPUTE_ROW:", dispute_trust,
+          "(sweep fired)" if sweep_fired else "(no verdict divergence)")
     print("DONE. contract:", addr)
 
 
