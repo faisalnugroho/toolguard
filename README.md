@@ -68,10 +68,13 @@ permanent:
   audit; `is_flagged` keeps its boolean for compatibility but the report
   view carries the dispute state consumers need.
 
-The shared 100-audit registry is protected against permissionless
-exhaustion: max 5 OPEN audits per owner (slots release on resolve), max 5
-audits per identical bundle (keyed by `binding_sha256`, so fresh audit ids
-cannot bypass it), plus the global cap.
+The admission queue is protected against permissionless exhaustion: at most
+100 audits may be OPEN globally (`MAX_ACTIVE_AUDITS`), max 5 OPEN audits per
+owner (slots release on owner-authorized resolve), and max 5 audits per
+identical bundle (keyed by `binding_sha256`). Resolved audit records and flag
+evidence remain historical records and are not deleted to reclaim capacity.
+Historical storage retention is a separate operational risk and is not
+bounded by `MAX_ACTIVE_AUDITS`.
 
 ## Why GenLayer is necessary
 

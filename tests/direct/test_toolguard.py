@@ -823,9 +823,9 @@ def test_capacity_bundle_cap_keyed_by_binding(c, direct_vm):
 
 
 def test_capacity_registry_full_still_enforced(c, direct_vm):
-    """The global 100-audit cap stays; bundle/owner caps protect it from
-    permissionless exhaustion before it can be hit."""
-    assert 'registry_full' in _source()
+    """The global active limit is enforced in the contract while history is retained."""
+    assert 'MAX_ACTIVE_AUDITS = 100' in _source()
+    assert json.loads(c.get_capacity()) == {'active': 0, 'capacity': 100, 'historical': 0}
     s = stats(c)
     assert s['total'] == 0
 

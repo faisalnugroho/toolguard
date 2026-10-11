@@ -59,9 +59,12 @@ Fail-closed: missing/tampered/oversized/thin documents ⇒ INCONCLUSIVE.
   correction dispute against the earlier flag (resolve-time sweep +
   explicit `correct_flag`, owner-only for 90 days then permissionless).
   Flags are never deleted and never silently permanent.
-- **Capacity controls:** max 5 OPEN audits per owner (released on
-  resolve), max 5 audits per identical bundle (keyed by `binding_sha256` —
-  audit-id recycling cannot bypass it), global 100-audit cap retained.
+- **Capacity controls:** max 5 OPEN audits per owner (released only by the
+  recorded owner's resolve), max 5 audits per identical bundle (keyed by
+  `binding_sha256` — audit-id recycling cannot bypass it), and a global
+  `MAX_ACTIVE_AUDITS = 100` admission bound. Resolved audit records and flag
+  evidence remain historical records; the active bound does not cap their
+  cumulative storage growth.
 
 ## Live deployment (Studionet)
 
@@ -92,7 +95,9 @@ Fail-closed: missing/tampered/oversized/thin documents ⇒ INCONCLUSIVE.
   the steward-round suite: canonical binding mismatches (manifest vs
   descriptors, declared vs fetched names), competing audit results with
   recorded disputes, correct_flag gate matrix, and the capacity controls
-  (per-owner OPEN cap, per-bundle cap by binding, global cap).
+  (per-owner OPEN cap, per-bundle cap by binding, and the global
+  `MAX_ACTIVE_AUDITS = 100` admission cap; historical retention remains
+  separately unbounded).
 - genvm-lint: 3/3 checks + SDK validation passed (Python 3.12 toolchain).
 - Live consensus smoke (challenge window 300 s enforced by node clock):
   - 1× poisoned MCP server audit ⇒ FLAGGED (R1+R2+R3, verbatim citations

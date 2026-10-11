@@ -6,7 +6,7 @@ import re
 
 MAX_TOOLS = 8
 MIN_TOOLS = 2
-MAX_AUDITS = 100
+MAX_ACTIVE_AUDITS = 100
 MAX_OPEN_PER_OWNER = 5
 MAX_AUDITS_PER_BUNDLE = 5
 MAX_URL = 400
@@ -313,15 +313,16 @@ class ToolGuard(gl.Contract):
     entries are never deleted, so history stays auditable and a false
     PERMANENT flag is impossible.
 
-    Permissionless-capacity controls on the global 100-audit registry:
+    Permissionless-capacity controls on the global 100-audit admission queue:
     (a) at most MAX_OPEN_PER_OWNER audits per owner can sit OPEN at once
-    (the slot releases on resolve, so griefing cannot strand other owners'
-    audits), (b) at most MAX_AUDITS_PER_BUNDLE audits may ever target one
-    identical artifact bundle — bundle_index is keyed by the content-derived
-    binding_sha256, not by attacker-chosen audit ids, so id recycling
-    cannot bypass it, and (c) the global MAX_AUDITS cap. An audit is a
-    consensus risk OPINION over the submitted artifacts at the pinned
-    commits — not a guarantee about what a server does at runtime.
+    (the slot releases on owner-authorized resolve), (b) at most
+    MAX_AUDITS_PER_BUNDLE audits may ever target one identical artifact
+    bundle — bundle_index is keyed by the content-derived binding_sha256,
+    not by attacker-chosen audit ids, so id recycling cannot bypass it, and
+    (c) the global MAX_ACTIVE_AUDITS cap. Historical audits and flag evidence
+    are retained separately and are not deleted to reclaim an admission slot.
+    An audit is a consensus risk OPINION over the submitted artifacts at the
+    pinned commits — not a guarantee about what a server does at runtime.
     """
     audits: TreeMap[str, str]
     flagged: TreeMap[str, str]  # binding_sha256 -> flag entry (JSON)
@@ -330,6 +331,8 @@ class ToolGuard(gl.Contract):
     manifest_index: TreeMap[str, str]  # manifest digest -> binding_sha256
     bundle_index: TreeMap[str, str]  # binding_sha256 -> audits so far (int)
     owner_open: TreeMap[str, str]  # owner address -> OPEN audits (int)
+    active: TreeMap[str, str]  # admitted OPEN audit ids -> owner
+    active_count: str
     ids: str
     stats: str
 
@@ -341,6 +344,8 @@ class ToolGuard(gl.Contract):
         self.manifest_index = TreeMap()
         self.bundle_index = TreeMap()
         self.owner_open = TreeMap()
+        self.active = TreeMap()
+        self.active_count = "0"
         self.ids = "[]"
         self.stats = json.dumps({"total": 0, "trusted": 0, "flagged": 0,
                                  "inconclusive": 0}, sort_keys=True)
@@ -445,8 +450,10 @@ class ToolGuard(gl.Contract):
         currently_open = int(self.owner_open[owner]) \
             if owner in self.owner_open else 0
         require(currently_open < MAX_OPEN_PER_OWNER, "too_many_open_audits")
-        # Capacity (3): the global registry cap.
-        require(len(json.loads(self.ids)) < MAX_AUDITS, "registry_full")
+        # Global admission guard. ids is immutable historical evidence and
+        # must not be used as the live-capacity counter.
+        require(int(self.active_count) < MAX_ACTIVE_AUDITS,
+                "active_capacity_full")
         tool_budgets = budget_plan(len(tools))
         challenge_deadline = (parse_iso_epoch(gl.message_raw["datetime"])
                               + challenge_seconds)
@@ -466,6 +473,8 @@ class ToolGuard(gl.Contract):
             "result": {}})
         self.owner_open[owner] = str(currently_open + 1)
         self.bundle_index[binding_sha] = str(used + 1)
+        self.active[audit_id] = owner
+        self.active_count = str(int(self.active_count) + 1)
         ids = json.loads(self.ids)
         ids.append(audit_id)
         self.ids = json.dumps(ids)
@@ -474,6 +483,8 @@ class ToolGuard(gl.Contract):
     def resolve(self, audit_id: str) -> None:
         record = self._audit(audit_id)
         require(record["status"] == "OPEN", "already_resolved")
+        require(str(gl.message.sender_address) == record["owner"],
+                "only_owner_can_resolve")
         now = parse_iso_epoch(gl.message_raw["datetime"])
         # Immutable challenge period: no audit reaches a terminal verdict
         # before its challenge_deadline (node-assigned clock).
@@ -611,6 +622,9 @@ class ToolGuard(gl.Contract):
                 self.owner_open[owner] = str(remaining)
             else:
                 del self.owner_open[owner]
+        if audit_id in self.active:
+            del self.active[audit_id]
+            self.active_count = str(int(self.active_count) - 1)
 
     @gl.public.write
     def correct_flag(self, flagged_audit_id: str, corrected_by: str) -> None:
@@ -660,6 +674,13 @@ class ToolGuard(gl.Contract):
     @gl.public.view
     def get_stats(self) -> str:
         return self.stats
+
+    @gl.public.view
+    def get_capacity(self) -> str:
+        return json.dumps({"active": int(self.active_count),
+                           "capacity": MAX_ACTIVE_AUDITS,
+                           "historical": len(json.loads(self.ids))},
+                          sort_keys=True)
 
     @gl.public.view
     def get_flag_report(self, digest: str) -> str:
