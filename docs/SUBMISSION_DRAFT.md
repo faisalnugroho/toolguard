@@ -68,18 +68,18 @@ Fail-closed: missing/tampered/oversized/thin documents ⇒ INCONCLUSIVE.
 
 ## Live deployment (Studionet)
 
-- **Live contract (Studionet, v1.2):** `0x4Cc370E1cCa8B771C95b79Ba7bD1eB55716DF16C`
-  (deploy tx `0x4c89ceda…8b513`; deployed-code sha256 `604380df…2bbd` =
-  repo HEAD — byte-identity proven via `genlayer_py get_transaction`;
-  v1.1 `0xe31d825A…36A2` + archived log `docs/deployment_log_v1.1.json`
-  remain on-chain as history)
+- **Live contract (Studionet, v1.3):** `0xcC52670912A50aEC2EEa427673254e4EaAA5A07A`
+  (deployed-code sha256 `885f8e65…36f46`, 36,564 bytes = repo HEAD —
+  byte-identity proven via `genlayer_py get_transaction` ->
+  `data.contract_code`; v1.2 `0x4Cc370E1…DF16C` (`604380df…2bbd`) and
+  v1.1 `0xe31d825A…36A2` + their archived logs remain on-chain as history)
 - Deployer: `0x5E77b8D3655918454134a2d5BAd9dd76B741b4cB` (same key as the
   v1.1 deploy)
 - Historical: v1.1's deployed-code identity at commit `7d33b5b…` was
   `25fed33408bba66a…09133`, 22,314 bytes (archived proof in
   `docs/deployment_log_v1.1.json`)
 - dApp: https://faisalnugroho.github.io/toolguard/
-- Examples pinned at the deployment commit `e6fb9f7…` (byte-matched
+- Examples pinned at the deployment commit `c108e37…` (byte-matched
   pre-flight before every audit — every pinned URL fetched and compared
   against the local files; 7/7 byte-match)
 - v1.0 deployment `0x2937bf60…` was superseded before any audit resolved:
@@ -91,23 +91,23 @@ Fail-closed: missing/tampered/oversized/thin documents ⇒ INCONCLUSIVE.
 
 ## Verification summary (details + tx hashes in docs/deployment_log.json)
 
-- 77/77 direct-mode GenVM tests (mocked web/LLM boundaries) — including
+- 91/91 direct-mode GenVM tests (mocked web/LLM boundaries) — including
   the steward-round suite: canonical binding mismatches (manifest vs
   descriptors, declared vs fetched names), competing audit results with
   recorded disputes, correct_flag gate matrix, and the capacity controls
   (per-owner OPEN cap, per-bundle cap by binding, and the global
-  `MAX_ACTIVE_AUDITS = 100` admission cap; historical retention remains
-  separately unbounded).
+  `MAX_ACTIVE_AUDITS = 100` ACTIVE-admission cap with historical records
+  retained separately — plus adversarial red-team suites for
+  multi-owner/resolve authorization and storage growth).
 - genvm-lint: 3/3 checks + SDK validation passed (Python 3.12 toolchain).
 - Live consensus smoke (challenge window 300 s enforced by node clock):
   - 1× poisoned MCP server audit ⇒ FLAGGED (R1+R2+R3, verbatim citations
     quoting the exfiltration instructions)
-  - v1 clean descriptors ⇒ INCONCLUSIVE ×3, kept on-chain: the validator
-    consistently judged unrestricted-path `read_file` borderline under its
-    own R3 policy — the fail-closed path working as designed on a
-    borderline sample
-  - restricted v2 clean descriptors ⇒ TRUSTED ×3, identical verdicts,
-    every round round-1 (determinism), pinned at commit `7d33b5b`
+  - restricted clean descriptors ⇒ TRUSTED ×3, identical verdicts, every
+    round round-1 (determinism) — re-proven live on v1.3
+    (0xcC526709…A07A); earlier history (v1 INCONCLUSIVE ×3 honest
+    fail-closed on a borderline sample, v2 clean TRUSTED ×3 at
+    `7d33b5b`) stays on-chain.
 - Browser E2E on the live dApp: open audit from UI (burner wallet +
   faucet), challenge countdown, resolve from UI, FLAGGED stamp + citations
   rendered from chain state.

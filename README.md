@@ -7,11 +7,11 @@ descriptor file per tool. Verdicts — **TRUSTED**, **FLAGGED**, or
 **INCONCLUSIVE** — are derived by the contract, never chosen by the model.
 
 - **Live dApp:** https://faisalnugroho.github.io/toolguard/
-- **Live contract (Studionet, v1.2):** `0x4Cc370E1cCa8B771C95b79Ba7bD1eB55716DF16C`
+- **Live contract (Studionet, v1.3):** `0xcC52670912A50aEC2EEa427673254e4EaAA5A07A`
   (deploy tx + byte-identity sha256 in `docs/deployment_log.json`;
-  v1.1 `0xe31d825A…36A2` and its archived log in
-  `docs/deployment_log_v1.1.json` remain on-chain as history)
-- **Explorer:** https://explorer-studio.genlayer.com/address/0x4Cc370E1cCa8B771C95b79Ba7bD1eB55716DF16C
+  v1.2 `0x4Cc370E1…DF16C`, v1.1 `0xe31d825A…36A2` and their archived logs
+  remain on-chain as history)
+- **Explorer:** https://explorer-studio.genlayer.com/address/0xcC52670912A50aEC2EEa427673254e4EaAA5A07A
 
 ## The trust problem
 
@@ -128,7 +128,7 @@ genvm-lint (needs Python 3.12 + GENVMROOT):
 GENVMROOT=/tmp/genvmroot genvm-lint check contracts/toolguard.py
 ```
 
-## Live smoke evidence (Studionet, v1.2 @ 0x4Cc370E1…DF16C)
+## Live smoke evidence (Studionet, v1.3 @ 0xcC526709…A07A)
 
 See `docs/deployment_log.json` for the full record: deploy tx + code
 sha256 (byte-identity proven vs HEAD), 1× poisoned-server audit (FLAGGED,
